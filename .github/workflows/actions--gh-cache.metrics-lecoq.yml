@@ -1,0 +1,65 @@
+# Details: https://github.com/lowlighter/metrics
+#
+
+# Docs:
+#   https://github.com/lowlighter/metrics/blob/master/source/plugins/base/README.md
+#   https://github.com/lowlighter/metrics/blob/master/source/plugins/base/metadata.yml
+#   https://github.com/lowlighter/metrics/blob/master/source/plugins/core/README.md
+#   https://github.com/lowlighter/metrics/blob/master/source/plugins/core/metadata.yml
+
+name: "actions--gh-cache.metrics-lecoq: metrics card update at least every 24 hours"
+
+on:
+  schedule:
+    - cron: "0 */24 * * *"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  github-metrics:
+    runs-on: ubuntu-latest
+
+    # CAUTION:
+    #   Irrespective to the `[Skip GitHub Action]` presence in the `committer_message`, you must explicitly declare
+    #   `contents` with `write` permission, otherwise there will be infinite loop!
+    #   See for details:
+    #     https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication
+    #     https://github.com/lowlighter/metrics/discussions/1668
+    #
+    permissions:
+      contents: write
+
+    steps:
+      - name: Basic lecoq metrics
+        uses: lowlighter/metrics@latest
+        with:
+          template: classic
+
+          #base: header, activity, community, repositories, metadata
+
+          base_indepth: true
+
+          repositories_affiliations: owner, collaborator, organization_member
+
+          token: ${{ secrets.METRICS_LECOQ_TOKEN }}
+
+          # required for `output_condition: data-changed`
+          config_output: svg
+
+          config_timezone: Europe/Moscow
+
+          filename: repo/andry81/andry81/stickers/readme-stats/metrics-lecoq.svg
+
+          output_action: commit
+          output_condition: data-changed
+
+          # CAUTION:
+          #   In case of usage `committer_token` other than `GITHUB_TOKEN`, and custom `committer_message`,
+          #   the `[Skip GitHub Action]` must be a part of a commit message, otherwise there will be an infinite loop!
+          #   See for details:
+          #     https://github.com/lowlighter/metrics/issues/152
+          #     https://github.com/lowlighter/metrics/commit/c0f03635311ef727c7d40e15a8fc62f9091846ba
+          #
+          committer_token: ${{ github.token }}
+
+          committer_message: 'A/U: update `${filename}`'

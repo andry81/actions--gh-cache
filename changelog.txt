@@ -1,0 +1,2 @@
+2024.12.05:
+* new: .github/workflows/actions--gh-cache.metrics-lecoq.yml : metrics classic card generator through the workflow
